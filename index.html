@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#245c50">
+  <meta name="description" content="복약 일정과 건강 기록을 한곳에서 관리하는 약속 앱">
+  <title>약속 - 스마트 복약 관리</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status"></div>
+
+  <section id="auth-screen" class="auth-screen">
+    <div class="brand-panel">
+      <span class="brand-mark">약</span>
+      <p class="eyebrow">매일의 건강한 약속</p>
+      <h1>약속 <small>藥束</small></h1>
+      <p>복용 시간을 기억하고, 건강 기록을 차곡차곡 모아보세요.</p>
+      <div class="feature-chips">
+        <span>복약 알림</span><span>복용 이력</span><span>혈압·혈당</span>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth-mode="login">로그인</button>
+        <button class="auth-tab" data-auth-mode="signup">회원가입</button>
+      </div>
+      <form id="auth-form">
+        <div id="signup-fields" hidden>
+          <label>이름<input id="auth-name" autocomplete="name" placeholder="홍길동"></label>
+          <div class="form-grid">
+            <label>생년월일<input id="auth-birth" type="date"></label>
+            <label>성별
+              <select id="auth-gender"><option value="">선택 안 함</option><option>여성</option><option>남성</option><option>기타</option></select>
+            </label>
+          </div>
+          <label>보호자 연락처 (선택)<input id="auth-guardian" type="tel" placeholder="010-0000-0000"></label>
+          <label>기저질환 (선택)<input id="auth-condition" placeholder="예: 고혈압, 당뇨"></label>
+        </div>
+        <label>이메일<input id="auth-email" type="email" autocomplete="email" required placeholder="name@example.com"></label>
+        <label>비밀번호<input id="auth-password" type="password" minlength="6" required placeholder="6자 이상"></label>
+        <button class="primary wide" type="submit" id="auth-submit">로그인</button>
+      </form>
+      <div class="divider"><span>또는</span></div>
+      <button id="google-login" class="social wide" type="button">G&nbsp;&nbsp;Google로 계속하기</button>
+      <button id="demo-login" class="ghost wide" type="button">설정 전 데모로 둘러보기</button>
+      <p class="auth-note">건강 기록은 로그인한 사용자별로 분리해 저장됩니다.</p>
+    </div>
+  </section>
+
+  <div id="app-shell" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="logo" href="#dashboard"><span>약</span><strong>약속</strong></a>
+      <nav id="main-nav">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span>오늘</button>
+        <button class="nav-item" data-page="medicines"><span>＋</span>복용약</button>
+        <button class="nav-item" data-page="history"><span>✓</span>복용 이력</button>
+        <button class="nav-item" data-page="health"><span>♡</span>건강 기록</button>
+        <button class="nav-item" data-page="profile"><span>○</span>내 정보</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="mini-profile"><span id="avatar">나</span><div><strong id="sidebar-name">사용자</strong><small id="storage-mode">데모 저장</small></div></div>
+        <button id="logout" class="text-button">로그아웃</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p id="today-label" class="eyebrow"></p>
+          <h2 id="page-title">오늘도 건강한 하루 보내세요</h2>
+        </div>
+        <button id="notification-button" class="icon-button" title="알림 허용">♢<span id="alert-dot"></span></button>
+      </header>
+
+      <section id="page-dashboard" class="page active">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">오늘의 복약 현황</p>
+            <h3><span id="done-count">0</span> / <span id="total-count">0</span>회 완료</h3>
+            <p id="next-dose-text">복용 일정을 등록해 주세요.</p>
+          </div>
+          <div class="progress-ring" id="progress-ring"><strong id="success-rate">0%</strong><small>달성률</small></div>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="card schedule-card">
+            <div class="section-heading"><div><p class="eyebrow">TODAY</p><h3>오늘의 복용 일정</h3></div><button class="small primary" data-open-modal="medicine">약 추가</button></div>
+            <div id="today-doses" class="dose-list empty-state">등록된 복용 일정이 없습니다.</div>
+          </section>
+          <div class="side-stack">
+            <section class="card">
+              <div class="section-heading"><h3>오늘의 건강 기록</h3><button class="text-button" data-page-link="health">기록하기</button></div>
+              <div class="health-summary">
+                <div><span class="health-icon pressure">P</span><p>혈압</p><strong id="today-pressure">기록 없음</strong></div>
+                <div><span class="health-icon glucose">G</span><p>혈당</p><strong id="today-glucose">기록 없음</strong></div>
+              </div>
+            </section>
+            <section class="card tip-card"><p class="eyebrow">건강 알림</p><h3 id="health-tip">약은 충분한 물과 함께 복용하세요.</h3><p>작은 기록이 꾸준한 건강 관리의 시작입니다.</p></section>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-medicines" class="page">
+        <div class="section-heading page-heading"><div><p class="eyebrow">MEDICINES</p><h3>복용약 관리</h3><p>약별 시간과 복용 방법을 관리하세요.</p></div><button class="primary" data-open-modal="medicine">새 약 등록</button></div>
+        <div id="medicine-grid" class="medicine-grid"></div>
+      </section>
+
+      <section id="page-history" class="page">
+        <div class="section-heading page-heading"><div><p class="eyebrow">HISTORY</p><h3>복용 이력</h3><p>최근 30일의 복약 상태를 확인하세요.</p></div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><span>복용 성공률</span><strong id="history-rate">0%</strong></div>
+          <div class="stat-card"><span>복용 완료</span><strong id="history-done">0회</strong></div>
+          <div class="stat-card"><span>건너뛰기</span><strong id="history-skipped">0회</strong></div>
+        </div>
+        <section class="card"><div id="history-list" class="history-list empty-state">아직 복용 기록이 없습니다.</div></section>
+      </section>
+
+      <section id="page-health" class="page">
+        <div class="section-heading page-heading"><div><p class="eyebrow">HEALTH</p><h3>건강 기록</h3><p>혈압과 혈당의 변화를 한눈에 확인하세요.</p></div><button class="primary" data-open-modal="health">건강 수치 입력</button></div>
+        <div class="health-grid">
+          <section class="card chart-card"><div class="section-heading"><h3>최근 혈압</h3><span class="legend"><i class="sys"></i>수축기 <i class="dia"></i>이완기</span></div><canvas id="pressure-chart" height="220"></canvas></section>
+          <section class="card chart-card"><div class="section-heading"><h3>최근 혈당</h3><span class="legend"><i class="sugar"></i>혈당</span></div><canvas id="glucose-chart" height="220"></canvas></section>
+        </div>
+        <section class="card"><h3>최근 측정 기록</h3><div id="health-list" class="history-list empty-state">아직 건강 기록이 없습니다.</div></section>
+      </section>
+
+      <section id="page-profile" class="page">
+        <div class="section-heading page-heading"><div><p class="eyebrow">PROFILE</p><h3>내 정보</h3><p>건강 관리를 위한 기본 정보를 수정하세요.</p></div></div>
+        <form id="profile-form" class="card profile-form">
+          <div class="form-grid"><label>이름<input id="profile-name" required></label><label>이메일<input id="profile-email" disabled></label></div>
+          <div class="form-grid"><label>생년월일<input id="profile-birth" type="date"></label><label>성별<select id="profile-gender"><option value="">선택 안 함</option><option>여성</option><option>남성</option><option>기타</option></select></label></div>
+          <label>보호자 연락처<input id="profile-guardian" type="tel"></label>
+          <label>기저질환<input id="profile-condition"></label>
+          <button class="primary" type="submit">정보 저장</button>
+        </form>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="active" data-page="dashboard">오늘</button><button data-page="medicines">복용약</button><button data-page="history">이력</button><button data-page="health">건강</button>
+    </nav>
+  </div>
+
+  <dialog id="medicine-modal">
+    <form id="medicine-form" method="dialog">
+      <div class="modal-heading"><div><p class="eyebrow">MEDICINE</p><h3 id="medicine-modal-title">새 약 등록</h3></div><button class="icon-button close-modal" type="button">×</button></div>
+      <input id="medicine-id" type="hidden">
+      <label>약 이름<input id="medicine-name" required placeholder="예: 혈압약"></label>
+      <label>복용 목적<input id="medicine-purpose" placeholder="예: 혈압 관리"></label>
+      <div class="form-grid"><label>복용 시작일<input id="medicine-start" type="date" required></label><label>복용 종료일<input id="medicine-end" type="date"></label></div>
+      <label>복용 시간 <small>쉼표로 여러 시간을 입력하세요.</small><input id="medicine-times" required placeholder="08:00, 20:00"></label>
+      <div class="form-grid"><label>1회 용량<input id="medicine-dose" placeholder="예: 1정"></label><label>복용 방법<select id="medicine-meal"><option>식후</option><option>식전</option><option>식사 무관</option></select></label></div>
+      <div class="modal-actions"><button class="ghost close-modal" type="button">취소</button><button class="primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="health-modal">
+    <form id="health-form" method="dialog">
+      <div class="modal-heading"><div><p class="eyebrow">HEALTH</p><h3>건강 수치 입력</h3></div><button class="icon-button close-modal" type="button">×</button></div>
+      <div class="form-grid"><label>수축기 혈압<input id="health-systolic" type="number" min="50" max="250" placeholder="120"></label><label>이완기 혈압<input id="health-diastolic" type="number" min="30" max="160" placeholder="80"></label></div>
+      <div class="form-grid"><label>공복 혈당<input id="health-fasting" type="number" min="20" max="600" placeholder="95"></label><label>식후 혈당<input id="health-after" type="number" min="20" max="600" placeholder="130"></label></div>
+      <label>측정 시간<input id="health-time" type="datetime-local" required></label>
+      <div class="modal-actions"><button class="ghost close-modal" type="button">취소</button><button class="primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
